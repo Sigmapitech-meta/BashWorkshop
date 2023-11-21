@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 random_number=$(((RANDOM % 100) + 1))
 guess=-1

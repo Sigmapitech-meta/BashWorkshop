@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 echo -ne "Retrieving meteo...\r"
 
 ip=$(curl -s https://api.ipify.org)

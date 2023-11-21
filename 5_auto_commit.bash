@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 read -p "Type de commits: " -r type
 read -p "Fichier concernées: " -r file

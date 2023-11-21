@@ -1,5 +1,4 @@
-#!/bin/bash
-
+#!/usr/bin/env bash
 
 nb_file=$(ls -l | grep -c "^-")
 nb_file_last=$(ls -l .. | grep -c "^-")

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 threshold=$1
 download_dir="$HOME/Downloads"
