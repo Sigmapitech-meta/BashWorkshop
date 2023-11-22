@@ -1,25 +1,44 @@
 {
   outputs = { self, nixpkgs }:
     let
-      system = "x86_64-linux";
-      pkgs = nixpkgs.legacyPackages.${system};
+      forAllSystems = function:
+        nixpkgs.lib.genAttrs [
+          "x86_64-linux"
+          "aarch64-linux"
+          "x86_64-darwin"
+          "aarch64-darwin"
+        ]
+          (system:
+            let
+              pkgs = nixpkgs.legacyPackages.${system};
+            in
+            function pkgs);
+    in
+    {
+      formatter = forAllSystems (pkgs: pkgs.nixpkgs-fmt);
+      devShells = forAllSystems (pkgs:
+        let
+          default = pkgs.mkShell {
+            packages = [ pkgs.bash ];
+          };
+        in
+        { inherit default; });
 
-      isBashFile = path: (pkgs.lib.hasSuffix ".bash" path);
-      files = (builtins.attrNames (builtins.readDir ./.));
+      packages = forAllSystems (pkgs: with builtins;
+        let
+          bashExt = ".bash";
+          isBashFile = path: (pkgs.lib.hasSuffix bashExt path);
+          files = (attrNames (readDir ./.));
 
-      scripts = map
-        (s: builtins.substring 0 ((builtins.stringLength s) - 5) s)
-        (builtins.filter isBashFile files);
-    in {
-      formatter.${system} = pkgs.nixpkgs-fmt;
-      devShells.${system}.default = pkgs.mkShell {
-        packages = [ pkgs.bash ];
-      };
+          scripts = map
+            (s:
+              substring 0 ((stringLength s) - (stringLength bashExt)) s)
+            (filter isBashFile files);
 
-      packages.${system} = let
-        getFile = f: ./. + ("/" + f + ".bash");
-        scriptsMap = p:
-          (pkgs.writeShellScriptBin p (builtins.readFile (getFile p)));
-      in (nixpkgs.lib.genAttrs scripts scriptsMap);
+          scriptsMap = p: (pkgs.writeShellScriptBin
+            p
+            (readFile (./. + "/${p}.bash")));
+        in
+        (nixpkgs.lib.genAttrs scripts scriptsMap));
     };
 }
